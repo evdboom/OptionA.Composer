@@ -1,0 +1,12 @@
+﻿@if (_musicSheet is not null)
+{
+    @foreach (var line in _musicSheet.Lines)
+    {
+        <div>
+            <OptAMusicLine Line="line"/>
+        </div>
+    }
+    <p>@_currentLine</p>
+    <p>@_currentBar</p>
+    <p>@_currentNote</p>    
+}
