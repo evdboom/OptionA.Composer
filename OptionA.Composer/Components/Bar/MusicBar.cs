@@ -2,26 +2,22 @@
 
 namespace OptionA.Composer.Components
 {
-    public class MusicBar
+    public class MusicBar(MusicLine? parent, int beats, NoteLength beatLength)
     {
-        public MusicBar(int maximumLength, NoteLength length)
-        {
-            Notes = [];
-            MaximumLength = maximumLength;
-            Length = length;
-        }
-
-        public MusicBar(MusicBar source) : this(source.MaximumLength, source.Length)
+        public MusicBar(MusicBar source) : this(source.Parent, source.Beats, source.BeatLength)
         {
         }
 
-        public int MaximumLength { get; set; }
-        public NoteLength Length { get; set; }
-        public IList<MusicNote> Notes { get; set; }
+        public MusicLine? Parent { get; set; } = parent;
 
-        public bool TryAddNote(char note, NoteLength length, out int noteIndex)
+        public int Beats { get; set; } = beats;
+        public NoteLength BeatLength { get; set; } = beatLength;
+        public IList<MusicNote> Notes { get; set; } = [];
+        public bool IsFull => Notes.Sum(note => (note.IsExtended ? (double)note.Length * 1.5d : (double)note.Length)) - (Beats * (double)BeatLength) < double.Epsilon;
+
+        public bool TryAddNote(Note note, NoteLength length, out int noteIndex)
         {
-            if (!CanAddFull(length, out NoteLength maximumLength))
+            if (!CanAdd(length, false, 0, out NoteLength maximumLength))
             {
                 if (maximumLength == NoteLength.None)
                 {
@@ -32,10 +28,11 @@ namespace OptionA.Composer.Components
                 length = maximumLength;
             }
 
-            var newNote = new MusicNote
+            var newNote = new MusicNote(this)
             {
                 Note = note,
-                Length = length
+                Length = length,
+                Selected = true
             };
 
             Notes.Add(newNote);
@@ -43,26 +40,38 @@ namespace OptionA.Composer.Components
             return true;
         }
 
-        private bool CanAddFull(NoteLength length, out NoteLength maximumLength)
+        internal bool AllowIncrease(MusicNote musicNote, NoteLength increasedLength, bool extended)
         {
-            int currentLength = Notes.Sum(note => (int)note.Length);
-            int remainingLength = (MaximumLength * (int)Length) - currentLength;
+            return CanAdd(increasedLength, extended, (int)musicNote.Length + (musicNote.IsExtended ? (int)musicNote.Length / 2 : 0), out _);
+        }
+
+        private bool CanAdd(NoteLength length, bool extended, int subtract, out NoteLength maximumLength)
+        {
+            if (length == NoteLength.SixtyFourth || length == NoteLength.Whole)
+            {
+                extended = false;
+            }
+
+            var currentLength = Notes.Sum(note => (int)note.Length + (note.IsExtended ? (int)note.Length / 2 : 0)) - subtract;
+            var remainingLength = (Beats * (int)BeatLength) - currentLength;
 
             NoteLength[] validLengths = Enum.GetValues(typeof(NoteLength))
                                             .Cast<NoteLength>()
-                                            .Where(l => (int)l <= remainingLength && l != NoteLength.None)
+                                            .Where(l => ((int)l + (extended ? (int)l / 2 : 0)) <= remainingLength && l != NoteLength.None)
                                             .OrderByDescending(l => (int)l)
                                             .ToArray();
 
-            if (!validLengths.Any())
+            if (validLengths.Length == 0)
             {
                 maximumLength = NoteLength.None;
                 return false;
             }
 
-            if ((int)length > remainingLength)
+            var actualLength = (int)length + (extended ? (int)length / 2 : 0);
+
+            if (actualLength > remainingLength)
             {
-                maximumLength = validLengths.First();
+                maximumLength = validLengths[0];
                 return false;
             }
 

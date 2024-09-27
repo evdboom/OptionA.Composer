@@ -1,9 +1,19 @@
 ﻿@namespace OptionA.Composer.Components
 
-@if (Bar is not null)
-{
-    @foreach (var note in Bar.Notes)
+<span>
+    <svg width="100%" height="100">
+        <line x1="0" y1="0" x2="0" y2="100" stroke="black" stroke-width="2"/>
+        <line x1="0" y1="20" x2="100%" y2="20" stroke="black" stroke-width="2"/>
+        <line x1="0" y1="40" x2="100%" y2="40" stroke="black" stroke-width="2"/>
+        <line x1="0" y1="60" x2="100%" y2="60" stroke="black" stroke-width="2"/>
+        <line x1="0" y1="80" x2="100%" y2="80" stroke="black" stroke-width="2"/>
+        <line x1="100%" y1="0" x2="100%" y2="100" stroke="black" stroke-width="2"/>
+    </svg>
+    @if (Bar is not null)
     {
-        <OptAMusicNote Note="note"/>
-    }    
-}
+        @foreach (var note in Bar.Notes)
+        {
+            <OptAMusicNote Note="note"/>
+        }    
+    }
+</span>

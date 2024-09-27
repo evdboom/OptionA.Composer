@@ -6,18 +6,17 @@ namespace OptionA.Composer.Components.Sheet
     {
         public MusicSheet()
         {
-            Lines = [];
+            Lines = [new MusicLine('F', 4, 4, NoteLength.Quarter)];
         }
 
         public IList<MusicLine> Lines { get; set; }
+        public IEnumerable<MusicNote> SelectedMusicNotes => Lines
+            .SelectMany(line => line.Bars
+                .SelectMany(bar => bar.Notes
+                    .Where(note => note.Selected)));
 
-        public (int LineIndex, int BarIndex, int NoteIndex) AddNote(int lineIndex, int barIndex, char note)
+        public (int LineIndex, int BarIndex, int NoteIndex) AddNote(int lineIndex, int barIndex, Note note)
         {
-            if (!Lines.Any())
-            {
-                Lines.Add(new MusicLine('F', 4, 4, NoteLength.Quarter));
-            }
-
             var line = Lines[lineIndex];
             if (!line.TryAddNote(barIndex, note, out int newBarIndex, out int noteIndex))
             {
@@ -29,5 +28,7 @@ namespace OptionA.Composer.Components.Sheet
 
             return (lineIndex, newBarIndex, noteIndex);
         }
+
+        
     }
 }

@@ -1,6 +1,11 @@
 ﻿@namespace OptionA.Composer.Components
 
-@if (Note is not null)
+@if (Note?.Note is not null)
 {
-    <span>@Note.Note</span>
+    <span @attributes="@GetAttributes()">@Note.Note</span>
+    <nbsp />
+    <span>@Note.Length</span>
+    <nbsp />
+    <span>@Note.Octave</span>
+    <nbsp />
 }

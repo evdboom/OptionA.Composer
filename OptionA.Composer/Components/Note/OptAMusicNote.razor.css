@@ -1,0 +1,11 @@
+﻿[opta-selected] {
+    background-color: blue;
+}
+
+[opta-hover] {
+    background-color: purple;
+}
+
+[opta-selected][opta-hover] {
+    background-color: green;
+}
